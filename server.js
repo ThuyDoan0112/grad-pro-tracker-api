@@ -1,20 +1,31 @@
-// Require built-in module nodejs
-const http = require("http");
+// Require third-party module express
+const express = require("express");
 
-// Define http server
-const server = http.createServer((req, res) => {
-  // Handle users routes
-  if (req.url == "/users") {
-    res.end("User routes");
-  } else if (req.url == "/classes") {
-    // Handle classes routes
-    res.end("Class routes");
-  } else {
-    res.end("Hello world");
-  }
+// Init express app
+const app = express();
+
+// Handle routes
+app.get("/", function (req, res) {
+  res.send("Hello World");
 });
 
-// Start http server
-server.listen(8000, () => {
-  console.log("Server listening on port 8000");
+app.get("/users", (req, res) => {
+  const users = [
+    {
+      name: "Thuy",
+      age: 21,
+    },
+    {
+      name: "Duong",
+      age: 22,
+    },
+  ];
+
+  res.send(users);
+});
+
+// Start express server
+const port = 3000;
+const server = app.listen(port, () => {
+  console.log(`Server is listening on port ${port}`);
 });
