@@ -3,8 +3,15 @@ const http = require("http");
 
 // Define http server
 const server = http.createServer((req, res) => {
-  console.log(req);
-  res.end("Hello world");
+  // Handle users routes
+  if (req.url == "/users") {
+    res.end("User routes");
+  } else if (req.url == "/classes") {
+    // Handle classes routes
+    res.end("Class routes");
+  } else {
+    res.end("Hello world");
+  }
 });
 
 // Start http server
