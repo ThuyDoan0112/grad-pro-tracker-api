@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  studentId String?   @map("student_id") @db.VarChar(45)
+  email     String
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  classes  UsersOnClasses[]
+  projects Project[]
+  reports  Report[]
+
+  @@map("user")
+}
+
+model Class {
+  id        Int       @id @default(autoincrement())
+  name      String
+  code      String
+  type      String
+  startTime DateTime? @map("start_time")
+  endTime   DateTime? @map("end_time")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  users UsersOnClasses[]
+
+  @@map("class")
+}
+
+model UsersOnClasses {
+  userId  Int @map("user_id")
+  classId Int @map("class_id")
+
+  user  User  @relation(fields: [userId], references: [id])
+  class Class @relation(fields: [classId], references: [id])
+
+  @@id([userId, classId])
+  @@map("user_class")
+}
+
+model Project {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  name             String
+  description      String?
+  databaseSchema   String?   @map("database_schema")
+  githubRepository String?   @map("github_repository")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime? @updatedAt @map("updated_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  reports Report[]
+
+  @@map("project")
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @map("user_id")
+  projectId   Int       @map("project_id")
+  name        String
+  description String    @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@map("report")
+}
+
+enum Role {
+  USER
+  TEACHER
+  ADMIN
+}
