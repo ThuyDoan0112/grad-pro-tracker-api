@@ -2,6 +2,10 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const bcrypt = require('bcrypt');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 // To read environment variables from .env file
 dotenv.config();
@@ -17,24 +21,28 @@ app.use((req, res, next) => {
 
 app.use(morgan('dev'));
 
+app.use(express.json());
+
 // Handle routes
-app.get('/', (req, res) => {
-  res.send('Hello, World');
-});
+app.post('/api/users', async (req, res) => {
+  const { email, password, name } = req.body;
 
-app.get('/users', (req, res) => {
-  const users = [
-    {
-      name: 'Thuy',
-      age: 21,
-    },
-    {
-      name: 'Duong',
-      age: 22,
-    },
-  ];
+  if (!email || !password || !name) {
+    return res.status(400).json({
+      message: 'Email, name and password are require!',
+    });
+  }
+  const hashPassword = await bcrypt.hash(password, 10);
 
-  res.send(users);
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hashPassword,
+      name,
+    },
+  });
+
+  return res.status(201).json(user);
 });
 
 // Start express server
