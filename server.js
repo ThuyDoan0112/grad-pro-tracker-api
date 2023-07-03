@@ -1,10 +1,10 @@
 // Require third-party module express
-const express = require("express");
-const dotenv = require("dotenv");
-const morgan = require("morgan");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { PrismaClient } = require("@prisma/client");
+const express = require('express');
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
@@ -16,22 +16,22 @@ const app = express();
 
 // Middlewares
 app.use((req, res, next) => {
-  console.log("Time: ", Date.now());
+  console.log('Time: ', Date.now());
   next();
 });
 
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 
 app.use(express.json());
 
 // Handle routes
 // sign-up user
-app.post("/api/users", async (req, res) => {
+app.post('/api/users', async (req, res) => {
   const { email, password, name } = req.body;
 
   if (!email || !password || !name) {
     return res.status(400).json({
-      message: "Email, name and password are require!",
+      message: 'Email, name and password are require!',
     });
   }
   const hashPassword = await bcrypt.hash(password, 10);
@@ -48,12 +48,12 @@ app.post("/api/users", async (req, res) => {
 });
 
 // sign-in user
-app.post("/api/auth/sign-in", async (req, res) => {
+app.post('/api/auth/sign-in', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email, name and password are require!",
+        message: 'Email, name and password are require!',
       });
     }
 
@@ -64,14 +64,14 @@ app.post("/api/auth/sign-in", async (req, res) => {
     });
     if (!user) {
       return res.status(404).json({
-        message: "User is not exist!",
+        message: 'User is not exist!',
       });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({
-        message: "Password is not correct!",
+        message: 'Password is not correct!',
       });
     }
 
@@ -84,9 +84,40 @@ app.post("/api/auth/sign-in", async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: error.message || "Internal server error",
+      message: error.message || 'Internal server error',
     });
   }
+});
+
+// auth middleware
+app.use(async (req, res, next) => {
+  // TODO: get token from req headers
+  let token;
+  if (req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token) {
+    return res.status(401).json({
+      message: 'Unauthorize',
+    });
+  }
+
+  // TODO: verify token
+  const decoded = await jwt.verify(token, process.env.SECRET_KEY);
+  // TODO: Check if user existed in database
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decoded.id,
+    },
+  });
+  if (!user) {
+    return res.status(404).json({
+      message: 'Please login!',
+    });
+  }
+  // TODO: Assign req.user = current user and call next() => move to next handler
+  req.user = user;
+  next();
 });
 
 // Start express server
