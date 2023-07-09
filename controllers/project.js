@@ -54,4 +54,74 @@ const getProjects = async (req, res) => {
     });
   }
 };
-module.exports = { createProject, getProjects };
+const updateProject = async (req, res) => {
+  try {
+    const projectId = Number(req.params.id);
+    const { name, description, databaseSchema, githubRepository } = req.body;
+
+    let existProject = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+    });
+    if (!existProject) {
+      return res.status(400).json({
+        message: "Project not found",
+      });
+    }
+
+    existProject = await prisma.project.findFirst({
+      where: {
+        id: { not: projectId },
+        name,
+      },
+    });
+    if (existProject) {
+      return res.status(400).json({
+        message: "Project name already exists",
+      });
+    }
+
+    const project = await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        name,
+        description,
+        databaseSchema,
+        githubRepository,
+      },
+    });
+
+    res.status(200).json(project);
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Internal server error",
+    });
+  }
+};
+const deleteProject = async (req, res) => {
+  const projectId = Number(req.params.id);
+
+  const existProject = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+  if (!existProject) {
+    return res.status(400).json({
+      message: "Project not found",
+    });
+  }
+
+  const project = await prisma.project.delete({
+    where: {
+      id: projectId,
+    },
+  });
+
+  res.status(200).json(project);
+};
+
+module.exports = { createProject, getProjects, updateProject, deleteProject };
