@@ -37,4 +37,17 @@ const createProject = async (req, res) => {
     });
   }
 };
-module.exports = { createProject };
+const getProjects = async (req, res) => {
+  try {
+    const userId = Number(req.query.userId);
+
+    const projects = await prisma.project.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return res.status(200).json(projects);
+  } catch (error) {}
+};
+module.exports = { createProject, getProjects };
