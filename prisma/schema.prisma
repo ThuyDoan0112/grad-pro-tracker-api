@@ -56,7 +56,7 @@ model UsersOnClasses {
 model Project {
   id               Int       @id @default(autoincrement())
   userId           Int       @map("user_id")
-  name             String
+  name             String    @unique
   description      String?
   databaseSchema   String?   @map("database_schema")
   githubRepository String?   @map("github_repository")

@@ -5,6 +5,7 @@ const morgan = require("morgan");
 
 const userRouter = require("./routes/user");
 const authRouter = require("./routes/auth");
+const projectRouter = require("./routes/project");
 
 // To read environment variables from .env file
 dotenv.config();
@@ -25,6 +26,7 @@ app.use(express.json());
 // Handle routes
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/projects", projectRouter);
 
 // Start express server
 const port = process.env.PORT || 3000;
