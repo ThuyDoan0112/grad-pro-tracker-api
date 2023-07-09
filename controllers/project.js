@@ -13,12 +13,12 @@ const createProject = async (req, res) => {
       });
     }
 
-    const checkProject = await prisma.project.findUnique({
+    const existProject = await prisma.project.findUnique({
       where: {
         name,
       },
     });
-    if (checkProject) {
+    if (existProject) {
       return res.status(400).json({
         message: "Project name already exists",
       });
