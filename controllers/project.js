@@ -48,6 +48,10 @@ const getProjects = async (req, res) => {
     });
 
     return res.status(200).json(projects);
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Internal server error",
+    });
+  }
 };
 module.exports = { createProject, getProjects };
