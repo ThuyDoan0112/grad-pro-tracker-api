@@ -27,6 +27,9 @@ const createUser = async (req, res) => {
           ],
         },
       },
+      include: {
+        projects: true,
+      },
     });
 
     return res.status(201).json(user);
