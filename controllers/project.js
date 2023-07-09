@@ -101,5 +101,27 @@ const updateProject = async (req, res) => {
     });
   }
 };
+const deleteProject = async (req, res) => {
+  const projectId = Number(req.params.id);
 
-module.exports = { createProject, getProjects, updateProject };
+  const existProject = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+  if (!existProject) {
+    return res.status(400).json({
+      message: "Project not found",
+    });
+  }
+
+  const project = await prisma.project.delete({
+    where: {
+      id: projectId,
+    },
+  });
+
+  res.status(200).json(project);
+};
+
+module.exports = { createProject, getProjects, updateProject, deleteProject };

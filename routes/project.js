@@ -8,6 +8,9 @@ router
   .post(projectController.createProject)
   .get(projectController.getProjects);
 
-router.route("/:id").put(projectController.updateProject);
+router
+  .route("/:id")
+  .put(projectController.updateProject)
+  .delete(projectController.deleteProject);
 
 module.exports = router;
